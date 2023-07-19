@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.7.13</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+
+    <modules>
+        <module>mall-common</module>
+    </modules>
+
+    <groupId>cn.javgo</groupId>
+    <artifactId>my-mall</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+
+    <packaging>pom</packaging>
+
+    <name>my-mall</name>
+    <description>my-mall</description>
+
+    <properties>
+        <!-- 项目编码 -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <!-- 项目 JDK 版本 -->
+        <java.version>11</java.version>
+        <!-- 编译时跳过测试 -->
+        <skipTests>true</skipTests>
+        <!-- Docker 服务器地址 -->
+        <docker.host>http://192.168.80.8:2375</docker.host>
+        <!-- Docker Maven 插件版本 -->
+        <docker.maven.plugin.version>0.40.2</docker.maven.plugin.version>
+        <!-- PageHelper 分页插件版本 -->
+        <pagehelper-starter.version>1.4.5</pagehelper-starter.version>
+        <pagehelper.version>5.3.2</pagehelper.version>
+        <!-- Druid 数据库连接池版本 -->
+        <druid.version>1.2.14</druid.version>
+        <!-- Hutool 工具类版本 -->
+        <hutool.version>5.8.9</hutool.version>
+        <!-- Swagger API 文档版本 -->
+        <springfox-swagger.version>3.0.0</springfox-swagger.version>
+        <swagger-models.version>1.6.0</swagger-models.version>
+        <swagger-annotations.version>1.6.0</swagger-annotations.version>
+        <!-- MyBatis Generator 代码生成器版本 -->
+        <mybatis-generator.version>1.4.1</mybatis-generator.version>
+        <!-- MyBatis 版本 -->
+        <mybatis.version>3.5.10</mybatis.version>
+        <!-- MySQL 数据库驱动版本 -->
+        <mysql-connector.version>8.0.29</mysql-connector.version>
+        <!-- Spring Data 工具包 -->
+        <spring-data-commons.version>2.7.5</spring-data-commons.version>
+        <!-- JWT 安全认证版本 -->
+        <jjwt.version>0.9.1</jjwt.version>
+        <!-- 阿里云 OSS 版本 -->
+        <aliyun-oss.version>2.5.0</aliyun-oss.version>
+        <!-- Logstash 日志收集器版本 -->
+        <logstash-logback.version>7.2</logstash-logback.version>
+        <!-- MinIO 对象存储版本 -->
+        <minio.version>8.4.5</minio.version>
+        <!-- Jaxb API 版本 -->
+        <jaxb-api.version>2.3.1</jaxb-api.version>
+        <!-- mall-common 通用模块版本 -->
+        <mall-common.version>1.0-SNAPSHOT</mall-common.version>
+        <!-- mall-mbg 代码生成模块版本 -->
+        <mall-mbg.version>1.0-SNAPSHOT</mall-mbg.version>
+        <!-- mall-security 安全模块版本 -->
+        <mall-security.version>1.0-SNAPSHOT</mall-security.version>
+    </properties>
+
+    <dependencies>
+        <!-- Spring Boot Actuator 提供监控和管理 HTTP 端点的功能 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <!-- Spring Boot AOP 提供面向切面编程的功能 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
+
+        <!-- Spring Boot Test 提供单元测试功能 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Hutool 工具类 -->
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+        </dependency>
+
+        <!-- Lombok 插件 -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+
+        <!-- Spring Boot Configuration Processor 提供配置文件的自动提示功能 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- 解决 JDK 11 兼容性问题 -->
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>${jaxb-api.version}</version>
+        </dependency>
+    </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- mall 通用模块 -->
+            <dependency>
+                <groupId>cn.javgo</groupId>
+                <artifactId>mall-common</artifactId>
+                <version>${mall-common.version}</version>
+            </dependency>
+
+            <!-- mall 中 MBG 生成模块 -->
+            <dependency>
+                <groupId>com.macro.mall</groupId>
+                <artifactId>mall-mbg</artifactId>
+                <version>${mall-mbg.version}</version>
+            </dependency>
+
+            <!-- mall 安全模块 -->
+            <dependency>
+                <groupId>com.macro.mall</groupId>
+                <artifactId>mall-security</artifactId>
+                <version>${mall-security.version}</version>
+            </dependency>
+
+            <!-- MyBatis 分页插件 starter -->
+            <dependency>
+                <groupId>com.github.pagehelper</groupId>
+                <artifactId>pagehelper-spring-boot-starter</artifactId>
+                <version>${pagehelper-starter.version}</version>
+            </dependency>
+
+            <!-- MyBatis 分页插件 -->
+            <dependency>
+                <groupId>com.github.pagehelper</groupId>
+                <artifactId>pagehelper</artifactId>
+                <version>${pagehelper.version}</version>
+            </dependency>
+
+            <!-- 集成 druid 连接池 -->
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>druid-spring-boot-starter</artifactId>
+                <version>${druid.version}</version>
+            </dependency>
+
+            <!-- Hutool Java 工具包-->
+            <dependency>
+                <groupId>cn.hutool</groupId>
+                <artifactId>hutool-all</artifactId>
+                <version>${hutool.version}</version>
+            </dependency>
+
+            <!-- Swagger-UI API 文档生产工具 -->
+            <dependency>
+                <groupId>io.springfox</groupId>
+                <artifactId>springfox-boot-starter</artifactId>
+                <version>${springfox-swagger.version}</version>
+            </dependency>
+
+            <!-- 解决 Swagger 访问主页时的 NumberFormatException 问题 -->
+            <dependency>
+                <groupId>io.swagger</groupId>
+                <artifactId>swagger-models</artifactId>
+                <version>${swagger-models.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.swagger</groupId>
+                <artifactId>swagger-annotations</artifactId>
+                <version>${swagger-annotations.version}</version>
+            </dependency>
+
+            <!-- MyBatis 生成器 -->
+            <dependency>
+                <groupId>org.mybatis.generator</groupId>
+                <artifactId>mybatis-generator-core</artifactId>
+                <version>${mybatis-generator.version}</version>
+            </dependency>
+
+            <!-- MyBatis -->
+            <dependency>
+                <groupId>org.mybatis</groupId>
+                <artifactId>mybatis</artifactId>
+                <version>${mybatis.version}</version>
+            </dependency>
+
+            <!-- Mysql 数据库驱动 -->
+            <dependency>
+                <groupId>mysql</groupId>
+                <artifactId>mysql-connector-java</artifactId>
+                <version>${mysql-connector.version}</version>
+            </dependency>
+
+            <!-- Spring Data 工具包 -->
+            <dependency>
+                <groupId>org.springframework.data</groupId>
+                <artifactId>spring-data-commons</artifactId>
+                <version>${spring-data-commons.version}</version>
+            </dependency>
+
+            <!-- JWT(Json Web Token) 登录支持 -->
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt</artifactId>
+                <version>${jjwt.version}</version>
+            </dependency>
+
+            <!-- 阿里云 OSS -->
+            <dependency>
+                <groupId>com.aliyun.oss</groupId>
+                <artifactId>aliyun-sdk-oss</artifactId>
+                <version>${aliyun-oss.version}</version>
+            </dependency>
+
+            <!-- 集成 logstash 收集日志 -->
+            <dependency>
+                <groupId>net.logstash.logback</groupId>
+                <artifactId>logstash-logback-encoder</artifactId>
+                <version>${logstash-logback.version}</version>
+            </dependency>
+
+            <!-- MinIO JAVA SDK 对象存储 -->
+            <dependency>
+                <groupId>io.minio</groupId>
+                <artifactId>minio</artifactId>
+                <version>${minio.version}</version>
+            </dependency>
+
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <!-- Spring Boot Maven 插件 -->
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                </plugin>
+                <!-- Docker Maven 插件 -->
+                <plugin>
+                    <groupId>io.fabric8</groupId>
+                    <artifactId>docker-maven-plugin</artifactId>
+                    <version>${docker.maven.plugin.version}</version>
+                    <executions>
+                        <!-- 如果想在项目打包时构建镜像添加 -->
+                        <execution>
+                            <id>build-image</id>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>build</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <!-- Docker 远程管理地址 -->
+                        <dockerHost>${docker.host}</dockerHost>
+                        <images>
+                            <image>
+                                <!-- 定义镜像名称 -->
+                                <name>mall/${project.name}:${project.version}</name>
+                                <!-- 定义镜像构建行为 -->
+                                <build>
+                                    <!-- 定义基础镜像 -->
+                                    <from>openjdk:11</from>
+                                    <args>
+                                        <JAR_FILE>${project.build.finalName}.jar</JAR_FILE>
+                                    </args>
+                                    <!-- 定义哪些文件拷贝到容器中 -->
+                                    <assembly>
+                                        <!-- 定义拷贝到容器的目录 -->
+                                        <targetDir>/</targetDir>
+                                        <!-- 只拷贝生成的 jar 包 -->
+                                        <descriptorRef>artifact</descriptorRef>
+                                    </assembly>
+                                    <!-- 定义容器启动命令 -->
+                                    <entryPoint>["java",
+                                        "-jar","-Dspring.profiles.active=prod","/${project.build.finalName}.jar"]
+                                    </entryPoint>
+                                    <!-- 定义维护者 -->
+                                    <maintainer>javgo</maintainer>
+                                </build>
+                            </image>
+                        </images>
+                    </configuration>
+                </plugin>
+
+            </plugins>
+        </pluginManagement>
+    </build>
+
+</project>
