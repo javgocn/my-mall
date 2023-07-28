@@ -43,7 +43,7 @@
         <pagehelper.version>5.3.2</pagehelper.version>
         <!-- Druid 数据库连接池版本 -->
         <druid.version>1.2.14</druid.version>
-        <!-- Hutool 工具类版本 -->
+        <!-- Hutool 工具类 -->
         <hutool.version>5.8.9</hutool.version>
         <!-- Swagger API 文档版本 -->
         <springfox-swagger.version>3.0.0</springfox-swagger.version>
