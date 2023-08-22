@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.javgo.mall.dao.PmsProductLadderDao">
+    
+    <insert id="insertList" parameterType="java.util.List">
+        <!--
+            数据库表：pms_product_ladder
+            字段：商品id，满足的商品数量，折扣，折后价格
+        -->
+        insert into pms_product_ladder (product_id, count, discount, price)
+        values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.productId}, #{item.count}, #{item.discount}, #{item.price})
+        </foreach>
+    </insert>
+</mapper>

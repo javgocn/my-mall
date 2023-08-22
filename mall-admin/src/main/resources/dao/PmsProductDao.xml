@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.javgo.mall.dao.PmsProductDao">
+
+    <!-- 定义一个resultMap，用于接收并处理查询结果
+        id：resultMap 的唯一标识
+        type：resultMap 的类型，即接收查询结果的类型，如果是一个集合则为集合中元素的类型
+        extends：继承的 resultMap，即继承了哪个 resultMap，这里继承了 PmsProductMapper.ResultMapWithBLOBs 从而可以直接使用
+                 PmsProductMapper 中的 resultMap 中的属性
+     -->
+    <resultMap id="updateInfoMap" type="cn.javgo.mall.dto.PmsProductResult" extends="cn.javgo.mall.mapper.PmsProductMapper.ResultMapWithBLOBs">
+        <!-- result 标签用于接收查询结果中的列
+            column：查询结果中的列名
+            jdbcType：查询结果中的列的类型
+            property：接收查询结果的属性名
+         -->
+        <result column="cateParentId" jdbcType="BIGINT" property="cateParentId" />
+        <!--
+            collection 标签用于接收查询结果中的集合
+            property：接收查询结果的属性名
+            columnPrefix：查询结果中的列名前缀，即查询结果中的列名为 ladder_id，ladder_product_id，ladder_discount，ladder_count，ladder_price
+                          但是在接收查询结果时，只需要接收 ladder_id，ladder_product_id，ladder_discount，ladder_count，ladder_price
+                          所以这里使用 columnPrefix="ladder_"，表示查询结果中的列名前缀为 ladder_
+            resultMap：接收查询结果的 resultMap，即接收查询结果的类型，这里使用 cn.javgo.mall.mapper.PmsProductLadderMapper.BaseResultMap
+                       表示接收查询结果的类型为 cn.javgo.mall.mapper.PmsProductLadderMapper.BaseResultMap
+         -->
+        <collection property="productLadderList" columnPrefix="ladder_" resultMap="cn.javgo.mall.mapper.PmsProductLadderMapper.BaseResultMap"/>
+        <collection property="productFullReductionList" columnPrefix="fullReduction_" resultMap="cn.javgo.mall.mapper.PmsProductFullReductionMapper.BaseResultMap"/>
+        <collection property="memberPriceList" columnPrefix="memberPrice_" resultMap="cn.javgo.mall.mapper.PmsMemberPriceMapper.BaseResultMap"/>
+        <collection property="skuStockList" columnPrefix="sku_" resultMap="cn.javgo.mall.mapper.PmsSkuStockMapper.BaseResultMap"/>
+        <collection property="productAttributeValueList" columnPrefix="attribute_" resultMap="cn.javgo.mall.mapper.PmsProductAttributeValueMapper.BaseResultMap"/>
+
+        <!--
+            这两个集合的查询结果为下面我们单独写的两个查询语句，下面是涉及属性的解释：
+            property：接收查询结果的属性名，对应 PmsProductResult 中的 subjectProductRelationList 和 prefrenceAreaProductRelationList
+                      实际是在 PmsProductParam 中定义的。
+            column：这里使用了 column="{productId=id}"，为什么是 productId=id 呢？这里的 id 是查询方法 getUpdateInfo 中通过 @Param("id")
+                    传递的具体的商品 id，而 productId 是查询结果中的列名，即通过商品 id 查询出来的商品与专题关系表中的商品 id，所以这里使用
+                    column="{productId=id}"，表示通过商品 id 查询出来的商品与专题关系表中的商品 id 与传递的具体的商品 id 相等时，才将查询结果
+                    放入到 PmsProductResult 中的 subjectProductRelationList 和 prefrenceAreaProductRelationList 中。
+        -->
+        <collection property="subjectProductRelationList" column="{productId=id}" select="selectSubjectProductRelationByProductId"/>
+        <collection property="prefrenceAreaProductRelationList" column="{productId=id}" select="selectPrefrenceAreaProductRelationByProductId"/>
+    </resultMap>
+
+    <!--  用于从数据库中获取与特定商品相关的信息
+          涉及的数据库表：
+              - pms_product：商品表
+              - pms_product_category：商品分类表
+              - pms_product_ladder：商品阶梯价格表
+              - pms_product_full_reduction：商品满减表
+              - pms_member_price：商品会员价格表
+              - pms_sku_stock：商品sku库存表
+              - pms_product_attribute_value：商品参数及自定义规格属性表
+          涉及的数据库表之间的关系：（都是一对多关，都使用了左外连接来确保即使没有关联数据也能查询出来，因为商品信息是必须要有的）
+              - pms_product 与 pms_product_category：一个商品只属于一个商品分类，而一个商品分类可以有多个商品
+              - pms_product 与 pms_product_ladder：一个商品可以有多个阶梯价格，而一个阶梯价格只属于一个商品
+              - pms_product 与 pms_product_full_reduction：一个商品可以有多个满减，而一个满减只属于一个商品
+              - pms_product 与 pms_member_price：一个商品可以有多个会员价格，而一个会员价格只属于一个商品
+              - pms_product 与 pms_sku_stock：一个商品可以有多个sku库存，而一个sku库存只属于一个商品
+              - pms_product 与 pms_product_attribute_value：一个商品可以有多个商品参数及自定义规格属性，而一个商品参数及自定义规格属性只属于一个商品
+    -->
+    <select id="getUpdateInfo" resultMap="updateInfoMap">
+        -- 从 pms_product 表中选择全部商品信息
+        SELECT  *,
+
+            -- 从 pms_product_category 表中选择商品分类的父ID
+            pc.parent_id cateParentId,
+
+            -- 从 pms_product_ladder 表中选择商品的阶梯价格信息 (阶梯id，阶梯商品id，阶梯折扣，阶梯数量，阶梯价格)
+            l.id ladder_id,l.product_id ladder_product_id,l.discount ladder_discount,l.count ladder_count,l.price ladder_price,
+
+            -- 从 pms_product_full_reduction 表中选择商品的满减价格信息（满减id，满减商品id，满减价格，满减折扣）
+            pf.id full_id,pf.product_id full_product_id,pf.full_price full_full_price,pf.reduce_price full_reduce_price,
+
+            -- 从 pms_member_price 表中选择商品的会员价格信息（会员价格id，会员价格商品id，会员价格等级id，会员价格，会员价格等级名称）
+            m.id member_id,m.product_id member_product_id,m.member_level_id member_member_level_id,
+            m.member_price member_member_price,m.member_level_name member_member_level_name,
+
+            -- 从 pms_sku_stock 表中选择商品的库存信息（库存id，库存商品id，库存价格，库存促销价格，库存预警值，库存图片，库存销量，库存编码，库存库存，库存销售属性）
+            s.id sku_id,s.product_id sku_product_id,s.price sku_price,s.promotion_price sku_promotion_price,
+            s.low_stock sku_low_stock,s.pic sku_pic,s.sale sku_sale,s.sku_code sku_sku_code,s.stock sku_stock,
+            s.sp_data sku_sp_data,
+
+            -- 从 pms_product_attribute_value 表中选择商品的属性值信息（属性值id，属性值商品id，属性值属性id，属性值）
+            a.id attribute_id,a.product_id attribute_product_id,a.product_attribute_id attribute_product_attribute_id,
+            a.value attribute_value
+
+        FROM pms_product p
+        -- 与 pms_product_category 表进行左连接，基于商品分类ID进行关联
+        LEFT JOIN pms_product_category pc on pc.id = p.product_category_id
+        -- 与 pms_product_ladder 表进行左连接，基于商品ID进行关联
+        LEFT JOIN pms_product_ladder l ON p.id = l.product_id
+        -- 与 pms_product_full_reduction 表进行左连接，基于商品ID进行关联
+        LEFT JOIN pms_product_full_reduction pf ON pf.product_id=p.id
+        -- 与 pms_member_price 表进行左连接，基于商品ID进行关联
+        LEFT JOIN pms_member_price m ON m.product_id = p.id
+        -- 与 pms_sku_stock 表进行左连接，基于商品ID进行关联
+        LEFT JOIN pms_sku_stock s ON s.product_id = p.id
+        -- 与 pms_product_attribute_value 表进行左连接，基于商品ID进行关联
+        LEFT JOIN pms_product_attribute_value a ON a.product_id=p.id
+        -- 查询条件：商品ID
+        WHERE p.id = #{id};
+    </select>
+
+    <!--
+        说明：
+        下面单独写了两个查询 selectSubjectProductRelationByProductId 和 selectPrefrenceAreaProductRelationByProductId，
+        这两个查询是为了解决在查询商品详情时，商品的专题和优选信息无法查询出来的问题，因为这两个信息是在商品详情页中展示的，所以在查询商品
+        详情时，需要将这两个信息也查询出来，但是这两个信息是在 cms_subject_product_relation 和 cms_prefrence_area_product_relation
+        表中，而这两个表与 pms_product 表是没有关联的，所以在查询商品详情时，无法将这两个信息查询出来，所以需要单独写两个查询来查询这两个
+        信息。
+        那么，如何使用或者获取到这两个查询的结果呢？答案是使用 resultMap，将这两个查询的结果映射到 resultMap 中，然后在 getUpdateInfo
+        查询中使用 resultMap，将这两个查询的结果映射到 getUpdateInfo 查询的结果中，这样就可以将这两个查询的结果查询出来了。
+    -->
+    <select id="selectSubjectProductRelationByProductId" resultMap="cn.javgo.mall.mapper.CmsSubjectProductRelationMapper.BaseResultMap">
+        select * from cms_subject_product_relation where product_id = #{productId}
+    </select>
+
+    <select id="selectPrefrenceAreaProductRelationByProductId" resultMap="cn.javgo.mall.mapper.CmsPrefrenceAreaProductRelationMapper.BaseResultMap">
+        select * from cms_prefrence_area_product_relation where product_id = #{productId}
+    </select>
+
+</mapper>

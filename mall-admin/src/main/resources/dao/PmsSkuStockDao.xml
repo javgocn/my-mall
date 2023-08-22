@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.javgo.mall.dao.PmsSkuStockDao">
+
+    <insert id="insertList">
+        <!--
+            数据库表：pms_sku_stock
+            字段：product_id(商品id)，sku_code(库存编号)，price(价格)，stock(库存)，low_stock(预警库存)，pic(展示图片)，sale(销量)，
+                 sp_data(商品销售属性，json格式)
+         -->
+        INSERT INTO pms_sku_stock (product_id, sku_code, price, stock, low_stock, pic, sale, sp_data) VALUES
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.productId,jdbcType=BIGINT},
+            #{item.skuCode,jdbcType=VARCHAR},
+            #{item.price,jdbcType=DECIMAL},
+            #{item.stock,jdbcType=INTEGER},
+            #{item.lowStock,jdbcType=INTEGER},
+            #{item.pic,jdbcType=VARCHAR},
+            #{item.sale,jdbcType=INTEGER},
+            #{item.spData,jdbcType=VARCHAR})
+        </foreach>
+    </insert>
+
+    <insert id="replaceList">
+        <!--
+            1.如何区分上面的 insertList 呢 ？
+              通过 id 字段，如果 id 字段有值，则执行 replaceList，否则执行 insertList。这样就可以实现新增和修改的功能。
+            2.为什么要使用 REPLACE INTO ？
+              REPLACE INTO 语句是 MySQL 的扩展语法，功能是插入一条新记录或者用新记录代替旧记录，如果表中存在主键或者唯一索引，
+              则使用新记录替换旧记录，否则插入一条新记录。如果使用 INSERT INTO 语句，当主键或者唯一索引存在时，会报错。
+        -->
+        INSERT INTO pms_sku_stock (id,product_id, sku_code, price, stock, low_stock,pic, sale, sp_data) VALUES
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.id,jdbcType=BIGINT},
+            #{item.productId,jdbcType=BIGINT},
+            #{item.skuCode,jdbcType=VARCHAR},
+            #{item.price,jdbcType=DECIMAL},
+            #{item.stock,jdbcType=INTEGER},
+            #{item.lowStock,jdbcType=INTEGER},
+            #{item.pic,jdbcType=VARCHAR},
+            #{item.sale,jdbcType=INTEGER},
+            #{item.spData,jdbcType=VARCHAR})
+        </foreach>
+    </insert>
+
+
+</mapper>
